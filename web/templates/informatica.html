@@ -1,0 +1,145 @@
+{{define "content"}}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900">Informatica Workflows</h2>
+            <div class="flex space-x-4">
+                <select class="px-3 py-2 border border-gray-300 rounded-md text-sm" id="folder-select"
+                    hx-get="/api/informatica/workflows" hx-target="#workflow-container" hx-trigger="change"
+                    name="folder">
+                    <option value="">All Folders</option>
+                    <option value="Production">Production</option>
+                    <option value="Development">Development</option>
+                    <option value="Testing">Testing</option>
+                </select>
+
+                <input type="text" placeholder="Search workflows..."
+                    class="px-3 py-2 border border-gray-300 rounded-md text-sm" hx-get="/api/informatica/search"
+                    hx-target="#workflow-container" hx-trigger="keyup changed delay:500ms" name="search">
+
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    hx-get="/api/informatica/workflows" hx-target="#workflow-container" hx-trigger="click">
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Summary -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm" hx-get="/api/informatica/summary"
+            hx-trigger="load, refresh from:body" data-auto-refresh="true">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-red-600">--</div>
+                <div class="text-gray-500">Failed Today</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">--</div>
+                <div class="text-gray-500">Completed Today</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-600">--</div>
+                <div class="text-gray-500">Long Running</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600">--</div>
+                <div class="text-gray-500">Total Workflows</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Toggle -->
+    <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex space-x-4">
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm" onclick="showTreeView()">
+                Tree View
+            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm" onclick="showListView()">
+                List View
+            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm" onclick="showFailuresView()">
+                Failures Only
+            </button>
+        </div>
+    </div>
+
+    <!-- Workflow Container -->
+    <div id="workflow-container" class="p-6" hx-get="/api/informatica/workflows" hx-trigger="load"
+        data-auto-refresh="true">
+        <div class="animate-pulse space-y-4">
+            <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+            <div class="h-8 bg-gray-200 rounded w-full"></div>
+            <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Details Modal -->
+<div id="workflow-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-96 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900" id="workflow-modal-title">Workflow Details</h3>
+                    <button onclick="closeWorkflowModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="workflow-modal-content" class="p-6 max-h-80 overflow-y-auto">
+                <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentView = 'tree';
+
+    function showTreeView() {
+        currentView = 'tree';
+        updateView();
+    }
+
+    function showListView() {
+        currentView = 'list';
+        updateView();
+    }
+
+    function showFailuresView() {
+        currentView = 'failures';
+        updateView();
+    }
+
+    function updateView() {
+        const folder = document.getElementById('folder-select').value;
+        htmx.ajax('GET', `/api/informatica/workflows?view=${currentView}&folder=${folder}`, {
+            target: '#workflow-container'
+        });
+
+        // Update button states
+        document.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('border', 'border-gray-300');
+        });
+
+        event.target.classList.add('bg-blue-600', 'text-white');
+        event.target.classList.remove('border', 'border-gray-300');
+    }
+
+    function showWorkflowDetails(workflowId, workflowName) {
+        document.getElementById('workflow-modal-title').textContent = workflowName;
+        htmx.ajax('GET', `/api/informatica/workflow-details?id=${workflowId}`, {
+            target: '#workflow-modal-content'
+        });
+        document.getElementById('workflow-modal').classList.remove('hidden');
+    }
+
+    function closeWorkflowModal() {
+        document.getElementById('workflow-modal').classList.add('hidden');
+    }
+</script>
+{{end}}

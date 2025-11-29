@@ -1,0 +1,32 @@
+# Production configuration for Salam Monitor
+mode: "prod"
+
+server:
+  port: 8080
+  host: "0.0.0.0"
+
+paths:
+  nfs_root: "/home/informaticaadmin/nfs_backup/monitoring"
+  log_dir: "/var/log/salam-monitor"
+
+services:
+  yarn_rm_url: "http://ruh-bdcldp01.itc.local:8088"
+  yarn_rm_url_test: "./mock/yarn/apps.json"
+
+# Top-level informatica section to match your config format
+informatica:
+  host: "172.16.1.100"
+  port: 1521
+  service_name: "ORCL"
+  username: "repo_read"
+  password: "password"
+  time_offset: 3
+
+logging:
+  level: "info"
+  file_path: "/var/log/salam-monitor"
+  file_log: true
+  json_log: false
+
+database:
+  sqlite_path: "/var/lib/salam-monitor/history.db"

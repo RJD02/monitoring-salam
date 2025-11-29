@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Informatica Workflows - Salam Monitoring</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Informatica Workflows</h1>
+
+        <!-- Filter and Controls -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <div class="flex space-x-4 items-center">
+                <input type="text" placeholder="Filter by workflow name..."
+                    class="border border-gray-300 rounded px-3 py-2 flex-1">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Filter
+                </button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    hx-get="/informatica/workflows/today" hx-target="#workflows-table" hx-trigger="click">
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Workflows Table -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Today's Workflows</h2>
+            </div>
+
+            <div id="workflows-table" class="p-6" hx-get="/informatica/workflows/today" hx-trigger="load, every 10s"
+                hx-target="this" hx-swap="innerHTML">
+                <div class="text-center text-gray-500">
+                    Loading workflows...
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Detail Modal (Initially Hidden) -->
+        <div id="workflow-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold">Workflow Details</h3>
+                            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="workflow-detail-content" class="p-6">
+                        <!-- Detail content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openWorkflowDetail(statId, workflowName) {
+            document.getElementById('workflow-modal').classList.remove('hidden');
+
+            // Load workflow details
+            htmx.ajax('GET', '/informatica/workflow/' + statId, {
+                target: '#workflow-detail-content',
+                swap: 'innerHTML'
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('workflow-modal').classList.add('hidden');
+        }
+
+        // Status badge styling
+        function getStatusBadge(status) {
+            const badges = {
+                'RUNNING': 'bg-yellow-100 text-yellow-800',
+                'SUCCESS': 'bg-green-100 text-green-800',
+                'FAILED': 'bg-red-100 text-red-800'
+            };
+            return badges[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        // Format elapsed time
+        function formatElapsed(elapsed) {
+            if (!elapsed) return 'N/A';
+            return elapsed.hrs + 'h ' + elapsed.min + 'm ' + elapsed.sec + 's';
+        }
+    </script>
+</body>
+
+</html>

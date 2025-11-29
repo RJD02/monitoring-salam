@@ -1,0 +1,100 @@
+{{define "content"}}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900">NFS Log Monitoring</h2>
+            <div class="flex space-x-4">
+                <input type="text" id="search-input" placeholder="Search logs..."
+                    class="px-3 py-2 border border-gray-300 rounded-md text-sm" hx-post="/api/nfs/search"
+                    hx-target="#search-results" hx-trigger="keyup changed delay:500ms">
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    hx-get="/api/nfs/logs" hx-target="#logs-container" hx-trigger="click">
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results" class="hidden px-6 py-4 bg-yellow-50 border-b border-gray-200">
+        <!-- Search results will be populated here -->
+    </div>
+
+    <!-- Filters -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div class="flex flex-wrap gap-4">
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm" hx-get="/api/nfs/logs"
+                hx-target="#logs-container" hx-trigger="change" name="source">
+                <option value="">All Sources</option>
+                <option value="miniboss">Miniboss</option>
+                <option value="platform1">Platform1</option>
+                <option value="platform2">Platform2</option>
+            </select>
+
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm" hx-get="/api/nfs/logs"
+                hx-target="#logs-container" hx-trigger="change" name="status">
+                <option value="">All Statuses</option>
+                <option value="failed">Failed Only</option>
+                <option value="completed">Completed Only</option>
+                <option value="running">In Progress</option>
+            </select>
+
+            <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm" hx-get="/api/nfs/logs"
+                hx-target="#logs-container" hx-trigger="change" name="date">
+        </div>
+    </div>
+
+    <!-- Logs Container -->
+    <div id="logs-container" class="p-6" hx-get="/api/nfs/logs" hx-trigger="load" data-auto-refresh="true">
+        <div class="animate-pulse space-y-4">
+            <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+            <div class="h-4 bg-gray-200 rounded w-full"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Detail Modal -->
+<div id="log-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-96 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900" id="modal-title">Log Details</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="modal-content" class="p-6 max-h-80 overflow-y-auto">
+                <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showLogDetails(filePath, logType, workflow) {
+        document.getElementById('modal-title').textContent = `${workflow} - ${logType}`;
+        htmx.ajax('GET', `/api/nfs/log-content?path=${encodeURIComponent(filePath)}`, {
+            target: '#modal-content'
+        });
+        document.getElementById('log-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('log-modal').classList.add('hidden');
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
+{{end}}

@@ -1,0 +1,96 @@
+{{define "content"}}
+<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <!-- Quick Stats -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">System Overview</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between">
+                <span class="text-sm text-gray-500">Mode:</span>
+                <span
+                    class="text-sm font-medium {{if .IsProd}}text-red-600{{else}}text-green-600{{end}}">{{.Mode}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm text-gray-500">NFS Root:</span>
+                <span class="text-sm font-mono text-gray-900">{{.NFSRoot}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm text-gray-500">Last Updated:</span>
+                <span class="text-sm text-gray-900">{{.Data.LastUpdate}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Failed Workflows Today -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Failed Workflows Today</h3>
+        <div hx-get="/api/dashboard/failed-workflows" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="min-h-24">
+            <div class="animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Running Yarn Applications -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Running Applications</h3>
+        <div hx-get="/api/dashboard/yarn-summary" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="min-h-24">
+            <div class="animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Log Summary -->
+    <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Today's Log Summary</h3>
+        <div hx-get="/api/dashboard/log-summary" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="min-h-32">
+            <div class="animate-pulse space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-full"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                <div class="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">System Health</h3>
+        <div hx-get="/api/dashboard/health-summary" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="min-h-24">
+            <div class="animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-8 bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+    <div class="flex flex-wrap gap-4">
+        <a href="/nfs"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            View NFS Logs
+        </a>
+        <a href="/yarn"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+            Manage Yarn Apps
+        </a>
+        <a href="/informatica"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+            Workflow Tree
+        </a>
+        <button
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            hx-post="/api/refresh-all" hx-target="body" hx-trigger="click">
+            Refresh All Data
+        </button>
+    </div>
+</div>
+{{end}}

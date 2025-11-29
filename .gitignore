@@ -1,0 +1,57 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.o
+*.a
+*.syso
+
+# Coverage and profiling files
+*.coverprofile
+*.cov
+*.prof
+*.pprof
+*.gcda
+*.gcno
+*.gcov
+coverage.txt
+profile.out
+
+# Build outputs and binaries
+bin/
+build/
+dist/
+tmp/
+*.tmp
+*.log
+*.pid
+monitoring-app
+salam-monitor*
+test-build
+
+# Archives and packaged artifacts
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.7z
+
+# Local environment overrides
+.env
+.env.*
+*.env
+!*.env.example
+!prod.env.example
+
+# Editor and OS metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

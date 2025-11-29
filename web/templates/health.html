@@ -1,0 +1,107 @@
+{{define "content"}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- System Resources -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">System Resources</h3>
+        <div hx-get="/api/health/system" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-4">
+            <!-- CPU Usage -->
+            <div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">CPU Usage</span>
+                    <span class="font-medium">--</span>
+                </div>
+                <div class="mt-1 bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Memory Usage -->
+            <div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Memory Usage</span>
+                    <span class="font-medium">--</span>
+                </div>
+                <div class="mt-1 bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Disk Usage -->
+            <div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Disk Usage</span>
+                    <span class="font-medium">--</span>
+                </div>
+                <div class="mt-1 bg-gray-200 rounded-full h-2">
+                    <div class="bg-yellow-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Health -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Service Health</h3>
+        <div hx-get="/api/health/services" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-500">Yarn Resource Manager</span>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">Checking...</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-500">Informatica Repository</span>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">Checking...</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-500">NFS Mount</span>
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">Checking...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Connectivity -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Network Connectivity</h3>
+        <div hx-get="/api/health/network" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-3">
+            <!-- Network checks will be populated here -->
+        </div>
+    </div>
+
+    <!-- Recent Errors -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Errors</h3>
+        <div hx-get="/api/health/errors" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="max-h-64 overflow-y-auto">
+            <!-- Recent errors will be populated here -->
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Logs Section -->
+<div class="mt-6 bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">System Logs</h3>
+    </div>
+    <div class="p-6">
+        <div class="flex space-x-4 mb-4">
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                hx-get="/api/health/logs?type=application" hx-target="#log-content">
+                Application Logs
+            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                hx-get="/api/health/logs?type=error" hx-target="#log-content">
+                Error Logs
+            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                hx-get="/api/health/logs?type=access" hx-target="#log-content">
+                Access Logs
+            </button>
+        </div>
+        <div id="log-content" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm max-h-64 overflow-y-auto">
+            <div class="text-gray-500">Select a log type to view logs...</div>
+        </div>
+    </div>
+</div>
+{{end}}

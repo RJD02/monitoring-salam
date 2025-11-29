@@ -1,0 +1,151 @@
+/* Custom styles for Salam Monitoring Platform */
+
+/* Status indicators */
+.status-running {
+    @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-failed {
+    @apply bg-red-100 text-red-800 border-red-200;
+}
+
+.status-pending {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.status-completed {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+/* Log entries */
+.log-entry {
+    @apply font-mono text-sm leading-relaxed;
+}
+
+.log-error {
+    @apply bg-red-50 text-red-900 border-l-4 border-red-400 pl-3;
+}
+
+.log-warning {
+    @apply bg-yellow-50 text-yellow-900 border-l-4 border-yellow-400 pl-3;
+}
+
+.log-info {
+    @apply bg-blue-50 text-blue-900 border-l-4 border-blue-400 pl-3;
+}
+
+/* Tree view for workflows */
+.workflow-tree {
+    font-family: 'Courier New', monospace;
+}
+
+.workflow-node {
+    @apply py-1 px-2 hover:bg-gray-50 cursor-pointer border-l-2 border-transparent;
+}
+
+.workflow-node:hover {
+    @apply border-blue-300;
+}
+
+.workflow-node.selected {
+    @apply bg-blue-50 border-blue-500;
+}
+
+/* Progress bars */
+.progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-fill {
+    @apply h-2 rounded-full transition-all duration-300;
+}
+
+/* Cards */
+.metric-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.metric-card:hover {
+    @apply shadow-md;
+}
+
+/* Tables */
+.data-table {
+    @apply w-full divide-y divide-gray-200;
+}
+
+.data-table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.data-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+.data-table tr:hover {
+    @apply bg-gray-50;
+}
+
+/* Animations */
+.pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading states */
+.skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+}
+
+.skeleton-text {
+    @apply skeleton h-4 mb-2;
+}
+
+.skeleton-title {
+    @apply skeleton h-6 mb-4;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .mobile-stack {
+        @apply flex-col;
+    }
+
+    .mobile-full {
+        @apply w-full;
+    }
+
+    .mobile-hide {
+        @apply hidden;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        @apply bg-gray-900 text-gray-100;
+    }
+
+    .dark-mode .bg-white {
+        @apply bg-gray-800;
+    }
+
+    .dark-mode .text-gray-900 {
+        @apply text-gray-100;
+    }
+}

@@ -1,0 +1,79 @@
+{{define "content"}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Failed Workflows -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Failed Workflows</h3>
+        <div hx-get="/api/dashboard/failed-workflows" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-2">
+            <div class="animate-pulse space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long Running Jobs -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Stale Applications</h3>
+        <div hx-get="/api/dashboard/stale-apps" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-2">
+            <div class="animate-pulse space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spark Error Analysis -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Spark Errors</h3>
+        <div hx-get="/api/dashboard/spark-errors" hx-trigger="load, refresh from:body" data-auto-refresh="true"
+            class="space-y-2">
+            <div class="text-sm text-gray-500">Analyzing Spark errors...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Queue Pressure Alerts -->
+<div class="mt-6 bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Queue Pressure & Alerts</h3>
+    </div>
+    <div class="p-6">
+        <div hx-get="/api/dashboard/alerts" hx-trigger="load, refresh from:body" data-auto-refresh="true">
+            <div class="text-gray-500 text-sm">Loading alerts...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Diagnostics -->
+<div class="mt-6 bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Error Diagnostics</h3>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="text-center p-4 border border-gray-200 rounded-lg" hx-get="/api/dashboard/broadcast-timeouts"
+                hx-trigger="load, refresh from:body" data-auto-refresh="true">
+                <div class="text-2xl font-bold text-red-600">--</div>
+                <div class="text-sm text-gray-500">Broadcast Timeouts</div>
+            </div>
+            <div class="text-center p-4 border border-gray-200 rounded-lg" hx-get="/api/dashboard/oom-errors"
+                hx-trigger="load, refresh from:body" data-auto-refresh="true">
+                <div class="text-2xl font-bold text-orange-600">--</div>
+                <div class="text-sm text-gray-500">OOM Errors</div>
+            </div>
+            <div class="text-center p-4 border border-gray-200 rounded-lg" hx-get="/api/dashboard/driver-bind-failures"
+                hx-trigger="load, refresh from:body" data-auto-refresh="true">
+                <div class="text-2xl font-bold text-yellow-600">--</div>
+                <div class="text-sm text-gray-500">Driver Bind Failures</div>
+            </div>
+            <div class="text-center p-4 border border-gray-200 rounded-lg" hx-get="/api/dashboard/connection-errors"
+                hx-trigger="load, refresh from:body" data-auto-refresh="true">
+                <div class="text-2xl font-bold text-purple-600">--</div>
+                <div class="text-sm text-gray-500">DB Connection Errors</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

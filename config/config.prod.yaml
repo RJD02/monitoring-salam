@@ -1,0 +1,19 @@
+mode: "prod"
+
+server:
+  port: 8080
+
+paths:
+  nfs_root_test: "./nfs_backup/monitoring"
+  nfs_root_prod: "/home/informaticaadmin/nfs_backup/monitoring"
+
+services:
+  yarn_rm_url: "http://yarn-resource-manager:8088"
+  informatica_db:
+    host: "172.16.1.100"
+    service: "INFAPROD"
+    user: "repo_read"
+    password: "CHANGE_ME_IN_PRODUCTION"
+
+database:
+  sqlite_path: "/opt/salam-monitoring/data/history.db"

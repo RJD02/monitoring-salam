@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Salam Monitoring</title>
+    <script src="/static/js/htmx.min.js"></script>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <style>
+        /* Custom styles for the monitoring interface */
+        .status-running {
+            @apply bg-green-100 text-green-800;
+        }
+
+        .status-failed {
+            @apply bg-red-100 text-red-800;
+        }
+
+        .status-pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+
+        .status-completed {
+            @apply bg-blue-100 text-blue-800;
+        }
+
+        .log-entry {
+            @apply font-mono text-sm;
+        }
+
+        .error-line {
+            @apply bg-red-50 text-red-900;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold">Salam Unified Monitoring Platform</h1>
+                    <span class="ml-4 px-2 py-1 text-xs bg-blue-500 rounded">{{.Mode}} mode</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm">NFS: {{.NFSRoot}}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="mb-6">
+            <nav class="flex space-x-8">
+                <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">Dashboard</a>
+                <a href="/nfs" class="text-blue-600 hover:text-blue-800 font-medium">NFS Monitoring</a>
+                <a href="/yarn" class="text-blue-600 hover:text-blue-800 font-medium">Yarn Applications</a>
+                <a href="/informatica" class="text-blue-600 hover:text-blue-800 font-medium">Informatica Workflows</a>
+                <a href="/health" class="text-blue-600 hover:text-blue-800 font-medium">System Health</a>
+            </nav>
+        </div>
+
+        <main>
+            {{block "content" .}}{{end}}
+        </main>
+    </div>
+
+    <!-- Global refresh indicator -->
+    <div id="refresh-indicator" class="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded shadow-lg hidden">
+        <div class="flex items-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+            Loading...
+        </div>
+    </div>
+
+    <script>
+        // Show loading indicator on HTMX requests
+        document.body.addEventListener('htmx:beforeRequest', function (evt) {
+            document.getElementById('refresh-indicator').classList.remove('hidden');
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function (evt) {
+            document.getElementById('refresh-indicator').classList.add('hidden');
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(function () {
+            const autoRefreshElements = document.querySelectorAll('[data-auto-refresh="true"]');
+            autoRefreshElements.forEach(function (element) {
+                htmx.trigger(element, 'refresh');
+            });
+        }, 30000);
+    </script>
+</body>
+
+</html>
