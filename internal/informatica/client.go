@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"salam-monitoring/internal/logger"
@@ -180,69 +181,25 @@ func (c *Client) GetWorkflowsToday() ([]WorkflowStat, error) {
 
 	// SQL Server query for workflows that started today
 	query := `
-		SELECT 
-			POW_STATID,
-			POW_WORKFLOWDEFINITIONNAM,
-			POW_STATE,
-			POW_STARTTIME,
-			POW_ENDTIME,
-			POW_CREATEDTIME,
-			POW_LASTUPDATETIME
-		FROM PO_WORKFLOWSTAT
-		WHERE POW_STARTTIME >= DATEDIFF(SECOND, '1970-01-01', CAST(GETDATE() AS DATE)) * 1000
-		ORDER BY POW_STARTTIME DESC
-	`
-
-	logger.Info("Executing workflow query: %s", query)
+SELECT
+POW_STATID,
+POW_WORKFLOWDEFINITIONNAM,
+POW_STATE,
+POW_STARTTIME,
+POW_ENDTIME,
+POW_CREATEDTIME,
+POW_LASTUPDATETIME
+FROM PO_WORKFLOWSTAT
+WHERE POW_STARTTIME >= DATEDIFF(SECOND, '1970-01-01', CAST(GETDATE() AS DATE)) * 1000
+ORDER BY POW_STARTTIME DESC
+`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	rows, err := c.db.QueryContext(ctx, query)
+	workflows, err := c.queryWorkflows(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute workflow query: %w", err)
-	}
-	defer rows.Close()
-
-	var workflows []WorkflowStat
-	for rows.Next() {
-		var wf WorkflowStat
-		var powState int
-		var startTimeMs, createdTimeMs, updatedTimeMs int64
-		var endTimePtr *int64
-
-		err := rows.Scan(
-			&wf.StatID,
-			&wf.WorkflowName,
-			&powState,
-			&startTimeMs,
-			&endTimePtr,
-			&createdTimeMs,
-			&updatedTimeMs,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan workflow row: %w", err)
-		}
-
-		// Convert states and times
-		wf.Status = mapWorkflowState(powState)
-		wf.StartedAt = c.convertEpochMillisToTime(startTimeMs)
-		wf.CreatedAt = c.convertEpochMillisToTime(createdTimeMs)
-		wf.UpdatedAt = c.convertEpochMillisToTime(updatedTimeMs)
-
-		if endTimePtr != nil {
-			endTime := c.convertEpochMillisToTime(*endTimePtr)
-			wf.FinishedAt = &endTime
-			wf.Elapsed = c.calculateElapsed(wf.StartedAt, endTime)
-		} else {
-			wf.Elapsed = c.calculateElapsed(wf.StartedAt, time.Time{})
-		}
-
-		workflows = append(workflows, wf)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating workflow rows: %w", err)
+		return nil, err
 	}
 
 	logger.Info("Retrieved %d workflows for today", len(workflows))
@@ -482,4 +439,118 @@ func (c *Client) getMockWorkflowWithTasks(statID int64) *WorkflowWithTasks {
 		Workflow: workflow,
 		Tasks:    tasks,
 	}
+}
+
+// GetRunningWorkflows returns only running top-level workflows (excludes child workflows when possible)
+func (c *Client) GetRunningWorkflows() ([]WorkflowStat, error) {
+	if c.mockMode {
+		return c.getMockRunningWorkflows(), nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	runningQueryWithParent := `
+SELECT
+POW_STATID,
+POW_WORKFLOWDEFINITIONNAM,
+POW_STATE,
+POW_STARTTIME,
+POW_ENDTIME,
+POW_CREATEDTIME,
+POW_LASTUPDATETIME
+FROM PO_WORKFLOWSTAT
+WHERE POW_STATE = 0
+AND (POW_PARENTSTATID IS NULL OR POW_PARENTSTATID = 0)
+ORDER BY POW_STARTTIME DESC
+`
+
+	runningQueryWithoutParent := `
+SELECT
+POW_STATID,
+POW_WORKFLOWDEFINITIONNAM,
+POW_STATE,
+POW_STARTTIME,
+POW_ENDTIME,
+POW_CREATEDTIME,
+POW_LASTUPDATETIME
+FROM PO_WORKFLOWSTAT
+WHERE POW_STATE = 0
+ORDER BY POW_STARTTIME DESC
+`
+
+	workflows, err := c.queryWorkflows(ctx, runningQueryWithParent)
+	if err != nil {
+		if strings.Contains(strings.ToUpper(err.Error()), "POW_PARENTSTATID") {
+			logger.Info("POW_PARENTSTATID column unavailable, retrying running workflows without child filter")
+			return c.queryWorkflows(ctx, runningQueryWithoutParent)
+		}
+		return nil, err
+	}
+
+	return workflows, nil
+}
+
+// queryWorkflows executes a workflow-level query and converts the results
+func (c *Client) queryWorkflows(ctx context.Context, query string, args ...any) ([]WorkflowStat, error) {
+	logger.Info("Executing workflow query: %s", query)
+
+	rows, err := c.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute workflow query: %w", err)
+	}
+	defer rows.Close()
+
+	var workflows []WorkflowStat
+	for rows.Next() {
+		var wf WorkflowStat
+		var powState int
+		var startTimeMs, createdTimeMs, updatedTimeMs int64
+		var endTimePtr *int64
+
+		err := rows.Scan(
+			&wf.StatID,
+			&wf.WorkflowName,
+			&powState,
+			&startTimeMs,
+			&endTimePtr,
+			&createdTimeMs,
+			&updatedTimeMs,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan workflow row: %w", err)
+		}
+
+		wf.Status = mapWorkflowState(powState)
+		wf.StartedAt = c.convertEpochMillisToTime(startTimeMs)
+		wf.CreatedAt = c.convertEpochMillisToTime(createdTimeMs)
+		wf.UpdatedAt = c.convertEpochMillisToTime(updatedTimeMs)
+
+		if endTimePtr != nil {
+			endTime := c.convertEpochMillisToTime(*endTimePtr)
+			wf.FinishedAt = &endTime
+			wf.Elapsed = c.calculateElapsed(wf.StartedAt, endTime)
+		} else {
+			wf.Elapsed = c.calculateElapsed(wf.StartedAt, time.Time{})
+		}
+
+		workflows = append(workflows, wf)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating workflow rows: %w", err)
+	}
+
+	return workflows, nil
+}
+
+func (c *Client) getMockRunningWorkflows() []WorkflowStat {
+	all := c.getMockWorkflowsToday()
+	var running []WorkflowStat
+	for _, wf := range all {
+		if wf.Status == "RUNNING" {
+			running = append(running, wf)
+		}
+	}
+	return running
 }

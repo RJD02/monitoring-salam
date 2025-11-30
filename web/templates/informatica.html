@@ -60,6 +60,9 @@
             <button class="px-4 py-2 border border-gray-300 rounded-md text-sm" onclick="showFailuresView()">
                 Failures Only
             </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm" onclick="showRunningView()">
+                Running Only
+            </button>
         </div>
     </div>
 
@@ -111,6 +114,11 @@
 
     function showFailuresView() {
         currentView = 'failures';
+        updateView();
+    }
+
+    function showRunningView() {
+        currentView = 'running';
         updateView();
     }
 
