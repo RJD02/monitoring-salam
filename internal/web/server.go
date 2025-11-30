@@ -615,7 +615,16 @@ func (s *Server) handleInformaticaWorkflows(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	workflows, err := s.infClient.GetWorkflowsToday()
+	view := r.URL.Query().Get("view")
+
+	var workflows []informatica.WorkflowStat
+	var err error
+
+	if view == "running" {
+		workflows, err = s.infClient.GetRunningWorkflows()
+	} else {
+		workflows, err = s.infClient.GetWorkflowsToday()
+	}
 	if err != nil {
 		logger.LogError("Failed to get Informatica workflows", err)
 		w.Header().Set("Content-Type", "text/html")
@@ -770,7 +779,16 @@ func (s *Server) handleInformaticaWorkflowsToday(w http.ResponseWriter, r *http.
 		return
 	}
 
-	workflows, err := s.infClient.GetWorkflowsToday()
+	view := r.URL.Query().Get("view")
+
+	var workflows []informatica.WorkflowStat
+	var err error
+
+	if view == "running" {
+		workflows, err = s.infClient.GetRunningWorkflows()
+	} else {
+		workflows, err = s.infClient.GetWorkflowsToday()
+	}
 	if err != nil {
 		logger.LogError("Failed to get Informatica workflows", err)
 		http.Error(w, "Failed to get workflows", http.StatusInternalServerError)
